@@ -15,8 +15,8 @@ namespace IDrewINFO344Assignment3ClassLibrary
 
         public FoundUrl(string pageTitle, string date, string url)
         {
-            this.PartitionKey = url.GetHashCode().ToString();
-            this.RowKey = Guid.NewGuid().ToString();
+            this.PartitionKey = url.GetHashCode().ToString();   // make domain
+            this.RowKey = Guid.NewGuid().ToString();            // make hash
 
             this.PageTitle = pageTitle;
             this.Date = date;

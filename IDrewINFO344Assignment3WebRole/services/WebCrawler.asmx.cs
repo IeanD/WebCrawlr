@@ -25,25 +25,26 @@ namespace IDrewINFO344Assignment3WebRole.services
 
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
-        public string StartCrawling(string website)
+        public string StartCrawling(string robotsTxtUrl)
         {
             List<string> sitemaps = new List<string>();
             List<string> disallowed = new List<string>();
 
-            string robotsTxtUrl = website + @"/robots.txt";
             string tempPath = System.IO.Path.GetTempFileName();
             try
             {
                 WebClient wc = new WebClient();
                 wc.DownloadFile(robotsTxtUrl, tempPath);
 
-                AzureQueue urlQueue = new AzureQueue(
-                    ConfigurationManager.AppSettings["StorageConnectionString"], "urlqueue");
-                AzureQueue cmdQueue = new AzureQueue(
-                    ConfigurationManager.AppSettings["StorageConnectionString"], "cmdqueue");
-                AzureTable disallowTable = new AzureTable(
-                    ConfigurationManager.AppSettings["StorageConnectionString"], "disallowtable");
+                //AzureQueue urlQueue = new AzureQueue(
+                //    ConfigurationManager.AppSettings["StorageConnectionString"], "urlqueue");
+                //AzureQueue cmdQueue = new AzureQueue(
+                //    ConfigurationManager.AppSettings["StorageConnectionString"], "cmdqueue");
+                AzureTable cmdTable = new AzureTable(
+                    ConfigurationManager.AppSettings["StorageConnectionString"], "cmdtable");
 
+
+                WorkerRoleCmd cmd = new WorkerRoleCmd()
                 StreamReader input = new StreamReader(tempPath);
                 string currLine = "";
                 string currUserAgent = "";
