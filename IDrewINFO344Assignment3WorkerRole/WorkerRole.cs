@@ -1,14 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using IDrewINFO344Assignment3ClassLibrary;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Queue;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace IDrewINFO344Assignment3WorkerRole
 {
@@ -16,6 +21,8 @@ namespace IDrewINFO344Assignment3WorkerRole
     {
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
+
+        private List<string> _disallowed;
 
         public override void Run()
         {
@@ -60,11 +67,81 @@ namespace IDrewINFO344Assignment3WorkerRole
 
         private async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following with your own logic.
+            CloudQueue urlQueue = new AzureQueue(
+                ConfigurationManager.AppSettings["StorageConnectionString"], "crawlrqueue")
+                .GetQueue();
+
+            CloudTable cmdTable = new AzureTable(
+                ConfigurationManager.AppSettings["StorageConnectionString"], "cmdtable")
+                .GetTable();
+
+            TableQuery<CrawlerCmd> cmdQuery = new TableQuery<CrawlerCmd>()
+                .Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, "workerRoleCmd"))
+                .Take(1);
+
+            var currentCmd = cmdTable.ExecuteQuery(cmdQuery);
+
+            while (!currentCmd.Any())
+            {
+                currentCmd = cmdTable.ExecuteQuery(cmdQuery);
+                Thread.Sleep(5000);
+            }
+
+            if (currentCmd != null && currentCmd.First().Cmd == "START")
+            {
+                string tempPath = System.IO.Path.GetTempFileName();
+                WebClient wc = new WebClient();
+                wc.DownloadFile(currentCmd.First().Domain, tempPath);
+
+                InitializeCrawl(tempPath, urlQueue);
+            }
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 Trace.TraceInformation("Working");
-                await Task.Delay(1000);
+
+                currentCmd = cmdTable.ExecuteQuery(cmdQuery);
+
+                if (currentCmd.First().Cmd == "START")
+                {
+                    CloudQueueMessage nextUrlMsg = urlQueue.GetMessage();
+                    string nextUrl = nextUrlMsg.AsString;
+                    if (nextUrl.EndsWith(".xml"))
+                    {
+                        using (WebClient wc = new WebClient())
+                        {
+                            //var s = wc.DownloadData
+                        }
+                    }
+                }
+            }
+
+            Thread.Sleep(1000);
+        }
+
+        private void InitializeCrawl(string filePath, CloudQueue urlQueue)
+        {
+            this._disallowed = new List<string>();
+            StreamReader input = new StreamReader(filePath);
+            string currLine = "";
+            string currUserAgent = "";
+            List<string> sitemaps = new List<string>();
+            while ((currLine = input.ReadLine()) != null)
+            {
+                if (currLine.StartsWith("Sitemap: "))
+                {
+                    sitemaps.Add(currLine.Substring(9));
+                    CloudQueueMessage msg = new CloudQueueMessage(currLine.Substring(9));
+                    urlQueue.AddMessage(msg);
+                }
+                else if (currLine.StartsWith("User-agent: "))
+                {
+                    currUserAgent = currLine.Substring(12);
+                }
+                else if (currLine.StartsWith("Disallow: ") && currUserAgent == "*")
+                {
+                    _disallowed.Add(currLine.Substring(10));
+                }
             }
         }
     }

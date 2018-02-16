@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IDrewINFO344Assignment3ClassLibrary
 {
-    class CrawlerCmd : TableEntity
+    public class CrawlerCmd : TableEntity
     {
         public string Cmd { get; set; }
         public string Domain { get; set; }
@@ -19,6 +19,11 @@ namespace IDrewINFO344Assignment3ClassLibrary
 
             this.Cmd = cmd;
             this.Domain = domain;
+        }
+
+        public CrawlerCmd()
+        {
+
         }
     }
 }

@@ -11,7 +11,7 @@ function performSearch(e) {
     let input = document.getElementById("urlCrawl").value;
     const url = "services/WebCrawler.asmx/StartCrawling";
     let data = JSON.stringify({
-        website: input
+        robotsTxtUrl: input
     });
     let init = {
         method: 'POST',

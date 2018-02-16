@@ -21,70 +21,27 @@ namespace IDrewINFO344Assignment3WebRole.services
     [ScriptService]
     public class WebCrawler : WebService
     {
-        private List<string> _disallowed { get; set; }
-
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public string StartCrawling(string robotsTxtUrl)
         {
-            List<string> sitemaps = new List<string>();
-            List<string> disallowed = new List<string>();
-
-            string tempPath = System.IO.Path.GetTempFileName();
             try
             {
-                WebClient wc = new WebClient();
-                wc.DownloadFile(robotsTxtUrl, tempPath);
+                CloudTable cmdTable = new AzureTable(
+                    ConfigurationManager.AppSettings["StorageConnectionString"], "cmdtable")
+                    .GetTable();
 
-                //AzureQueue urlQueue = new AzureQueue(
-                //    ConfigurationManager.AppSettings["StorageConnectionString"], "urlqueue");
-                //AzureQueue cmdQueue = new AzureQueue(
-                //    ConfigurationManager.AppSettings["StorageConnectionString"], "cmdqueue");
-                AzureTable cmdTable = new AzureTable(
-                    ConfigurationManager.AppSettings["StorageConnectionString"], "cmdtable");
+                CrawlerCmd cmd = new CrawlerCmd("START", robotsTxtUrl);
 
+                TableOperation insert = TableOperation.Insert(cmd);
+                cmdTable.Execute(insert);
 
-                WorkerRoleCmd cmd = new WorkerRoleCmd()
-                StreamReader input = new StreamReader(tempPath);
-                string currLine = "";
-                string currUserAgent = "";
-
-                while ((currLine = input.ReadLine()) != null)
-                {
-                    if (currLine.StartsWith("Sitemap: "))
-                    {
-                        sitemaps.Add(currLine.Substring(9));
-                        CloudQueueMessage msg = new CloudQueueMessage(currLine.Substring(9));
-                        urlQueue.GetQueue().AddMessage(msg);
-                    }
-                    else if (currLine.StartsWith("User-agent: "))
-                    {
-                        currUserAgent = currLine.Substring(12);
-                    }
-                    else if (currLine.StartsWith("Disallow: "))
-                    {
-                        DisallowUrl disallowUrl = new DisallowUrl(currUserAgent, website, currLine.Substring(10));
-                        TableOperation insertOperation = TableOperation.Insert(disallowUrl);
-                        disallowTable.GetTable().Execute(insertOperation);
-
-                        disallowed.Add(currLine.Substring(10));
-                    }
-                }
-
-                _disallowed = disallowed;
+                return ("Beginning to crawl " + robotsTxtUrl);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-
-                return e.ToString();
+                return "Error: " + ex.ToString();
             }
-
-            return ("Beginning to crawl " + website);
-        }
-
-        private void AddToUrlQueue(List<string> sitemaps)
-        {
-            throw new NotImplementedException();
         }
     }
 }

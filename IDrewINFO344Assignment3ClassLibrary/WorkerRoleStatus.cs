@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.WindowsAzure.Storage.Table;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,36 +7,36 @@ using System.Threading.Tasks;
 
 namespace IDrewINFO344Assignment3ClassLibrary
 {
-    public class WorkerRoleStatus
+    public class WorkerRoleStatus : TableEntity
     {
         public string CurrStatus { get; set; }
         public int CpuUsed { get; set; }
         public int RamAvailable { get; set; }
         public int NumUrlsCrawled { get; set; }
-        public List<string> LastTenUrls { get; set; }
+        public string LastTenUrls { get; set; }
 
         public WorkerRoleStatus(string currStatus, int cpuUsed, int ramAvailable, int numUrlsCrawled, List<string> lastTenUrls)
         {
+            this.PartitionKey = "WorkerRole Status";
+            this.RowKey = "WorkerRole Status";
+
             this.CurrStatus = currStatus;
             this.CpuUsed = cpuUsed;
             this.RamAvailable = ramAvailable;
             this.NumUrlsCrawled = numUrlsCrawled;
-            this.LastTenUrls = lastTenUrls;
+            this.LastTenUrls = LastTenUrlsToString(lastTenUrls);            
         }
 
-        public override string ToString()
+        public string LastTenUrlsToString(List<string> urls)
         {
             string result = "";
-            result += CurrStatus + "|";
-            result += CpuUsed.ToString() + "|";
-            result += RamAvailable.ToString() + "|";
-            result += NumUrlsCrawled.ToString() + "|";
-            if (LastTenUrls.Count < 10)
+
+            if (urls.Count < 10)
             {
-                foreach (var url in LastTenUrls)
+                foreach (var url in urls)
                 {
                     result += url;
-                    if (LastTenUrls.IndexOf(url) != LastTenUrls.Count -1)
+                    if (urls.IndexOf(url) != urls.Count -1)
                     {
                         result += ",";
                     }
@@ -43,10 +44,10 @@ namespace IDrewINFO344Assignment3ClassLibrary
             }
             else
             {
-                for (int currIndex = LastTenUrls.Count - 11; currIndex < LastTenUrls.Count -1; currIndex++)
+                for (int currIndex = urls.Count - 11; currIndex < urls.Count -1; currIndex++)
                 {
                     result += LastTenUrls[currIndex];
-                    if (currIndex != LastTenUrls.Count - 1)
+                    if (currIndex != urls.Count - 1)
                     {
                         result += ",";
                     }
