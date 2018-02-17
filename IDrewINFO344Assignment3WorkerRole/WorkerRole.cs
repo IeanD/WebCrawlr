@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using IDrewINFO344Assignment3ClassLibrary;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
@@ -106,12 +107,34 @@ namespace IDrewINFO344Assignment3WorkerRole
                 {
                     CloudQueueMessage nextUrlMsg = urlQueue.GetMessage();
                     string nextUrl = nextUrlMsg.AsString;
-                    if (nextUrl.EndsWith(".xml"))
+                    bool urlIsValid = true;
+                    foreach (var s in _disallowed)
                     {
-                        using (WebClient wc = new WebClient())
+                        if (nextUrl.Contains(s))
                         {
-                            //var s = wc.DownloadData
+                            urlIsValid = false;
                         }
+                    }
+                    if (nextUrl.EndsWith(".xml") && urlIsValid)
+                    {
+                        XElement sitemap = XElement.Load(nextUrl);
+                        string nameSpace = sitemap.GetDefaultNamespace().ToString();
+                        XName url = XName.Get("url", nameSpace);
+                        XName loc = XName.Get("loc", nameSpace);
+                        XName lastmod = XName.Get("lastmod", nameSpace);
+
+                        foreach (var urlElement in sitemap.Elements(url))
+                        {
+                            var currLocElement = urlElement.Element(loc);
+                            var currLastmodElement = urlElement.Element(lastmod);
+                            var foo = "bar";
+                            var s = currLocElement.Value;
+                            Thread.Sleep(100);
+                        }
+                    }
+                    else if (nextUrl.Contains(".htm") && urlIsValid)
+                    {
+
                     }
                 }
             }
