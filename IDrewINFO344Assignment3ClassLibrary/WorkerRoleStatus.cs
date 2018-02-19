@@ -15,7 +15,7 @@ namespace IDrewINFO344Assignment3ClassLibrary
         public int NumUrlsCrawled { get; set; }
         public string LastTenUrls { get; set; }
 
-        public WorkerRoleStatus(string currStatus, int cpuUsed, int ramAvailable, int numUrlsCrawled, List<string> lastTenUrls)
+        public WorkerRoleStatus(string currStatus, int cpuUsed, int ramAvailable, int numUrlsCrawled, Stack<string> lastTenUrls)
         {
             this.PartitionKey = "WorkerRole Status";
             this.RowKey = "WorkerRole Status";
@@ -27,34 +27,26 @@ namespace IDrewINFO344Assignment3ClassLibrary
             this.LastTenUrls = LastTenUrlsToString(lastTenUrls);            
         }
 
-        public string LastTenUrlsToString(List<string> urls)
+        public WorkerRoleStatus()
         {
+
+        }
+
+        public string LastTenUrlsToString(Stack<string> urls)
+        {
+            if (urls.Count == 0)
+            {
+                return "None (loading)";
+            }
             string result = "";
-
-            if (urls.Count < 10)
+            int numUrlsInStack = urls.Count;
+            foreach (var url in urls)
             {
-                foreach (var url in urls)
-                {
-                    result += url;
-                    if (urls.IndexOf(url) != urls.Count -1)
-                    {
-                        result += ",";
-                    }
-                }
-            }
-            else
-            {
-                for (int currIndex = urls.Count - 11; currIndex < urls.Count -1; currIndex++)
-                {
-                    result += LastTenUrls[currIndex];
-                    if (currIndex != urls.Count - 1)
-                    {
-                        result += ",";
-                    }
-                }
+                result += url;
+                result += ",";
             }
 
-            return result;
+            return result.TrimEnd(',');
         }
     }
 }

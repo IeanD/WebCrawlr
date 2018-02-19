@@ -33,7 +33,7 @@ namespace IDrewINFO344Assignment3WebRole.services
 
                 CrawlerCmd cmd = new CrawlerCmd("START", robotsTxtUrl);
 
-                TableOperation insert = TableOperation.Insert(cmd);
+                TableOperation insert = TableOperation.InsertOrReplace(cmd);
                 cmdTable.Execute(insert);
 
                 return ("Beginning to crawl " + robotsTxtUrl);
@@ -42,6 +42,33 @@ namespace IDrewINFO344Assignment3WebRole.services
             {
                 return "Error: " + ex.ToString();
             }
+        }
+
+        [WebMethod]
+        public List<string> GetWorkerRoleStatus()
+        {
+            List<string> status = new List<string>();
+            CloudTable statusTable = new AzureTable(
+                ConfigurationManager.AppSettings["StorageConnectionString"], "crawlrstatustable")
+                .GetTable();
+
+            TableQuery<WorkerRoleStatus> statusQuery = new TableQuery<WorkerRoleStatus>()
+                .Where(
+                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "WorkerRole Status")
+                );
+
+            WorkerRoleStatus result;
+
+            foreach (var statusItem in statusTable.ExecuteQuery(statusQuery))
+            {
+                result = statusItem;
+                status.Add("Current status: " + result.CurrStatus);
+                status.Add("CPU Utilization: " + result.CpuUsed + "%");
+                status.Add("RAM Available: " + result.RamAvailable + "MBytes");
+                status.Add("Number of URLs Crawled: " + result.NumUrlsCrawled);
+            }
+
+            return status;
         }
     }
 }
