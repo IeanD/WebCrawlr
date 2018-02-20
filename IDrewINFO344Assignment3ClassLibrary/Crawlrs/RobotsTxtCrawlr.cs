@@ -11,31 +11,60 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
     {
         public static void CrawlRobotsTxt(ref CrawlrDataHelper data, ref CrawlrStorageManager storage)
         {
+            string url = storage.GetCurrentRobotsTxt();
+            CrawlSpecificRobotsTxt(url, ref data, ref storage);
+
+            if (storage.GetCurrentRobotsTxt().Contains("cnn"))
+            {
+                CrawlSpecificRobotsTxt("http://www.bleacherreport.com/robots.txt", ref data, ref storage);
+            }
+        }
+
+        private static void CrawlSpecificRobotsTxt(string url, ref CrawlrDataHelper data, ref CrawlrStorageManager storage)
+        {
             string tempPath = Path.GetTempFileName();
             WebClient wc = new WebClient();
-            wc.DownloadFile(storage.GetCurrentCmd(), tempPath);
+            wc.DownloadFile(url, tempPath);
             StreamReader input = new StreamReader(tempPath);
             string currLine = "";
             string currUserAgent = "";
             List<string> sitemaps = new List<string>();
             while ((currLine = input.ReadLine()) != null)
             {
-                if (currLine.StartsWith("Sitemap: "))
+                var splitLine = currLine.Split(' ');
+                if (splitLine[0].ToLower() == "sitemap:")
                 {
-                    sitemaps.Add(currLine.Substring(9));
-                    data.QueuedXmls.Add(currLine.Substring(9));
-                    CloudQueueMessage msg = new CloudQueueMessage(currLine.Substring(9));
-                    storage.XmlQueue.AddMessage(msg);
-                    data.NumXmlsQueued++;
+                    bool pass = false;
+                    if (url.Contains("bleacherreport"))
+                    {
+                        if (splitLine[1].Contains("nba"))
+                        {
+                            pass = true;
+                        }
+                    }
+                    else
+                    {
+                        pass = true;
+                    }
+                    if (pass)
+                    {
+                        sitemaps.Add(splitLine[1]);
+                        data.QueuedXmls.Add(splitLine[1]);
+                        CloudQueueMessage msg = new CloudQueueMessage(splitLine[1]);
+                        storage.XmlQueue.AddMessage(msg);
+                        data.NumXmlsQueued++;
+
+                    }
                 }
-                else if (currLine.StartsWith("User-agent: "))
+                else if (splitLine[0].ToLower() == "user-agent:")
                 {
-                    currUserAgent = currLine.Substring(12);
+                    currUserAgent = splitLine[1];
                 }
-                else if (currLine.StartsWith("Disallow: ") && currUserAgent == "*")
+                else if (splitLine[0].ToLower() == "disallow:" && currUserAgent == "*")
                 {
-                    data.DisallowedStrings.Add(currLine.Substring(10));
+                    data.DisallowedStrings.Add(splitLine[1]);
                 }
+
             }
         }
     }

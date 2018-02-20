@@ -11,7 +11,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage.Entities
         public int NumUrlsCrawled { get; set; }
         public string LastTenUrls { get; set; }
 
-        public WorkerRoleStatus(string currStatus, int cpuUsed, int ramAvailable, int numUrlsCrawled, Stack<string> lastTenUrls)
+        public WorkerRoleStatus(string currStatus, int cpuUsed, int ramAvailable, int numUrlsCrawled, Queue<string> lastTenUrls)
         {
             this.PartitionKey = "WorkerRole Status";
             this.RowKey = "WorkerRole Status";
@@ -28,7 +28,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage.Entities
 
         }
 
-        public string LastTenUrlsToString(Stack<string> urls)
+        public string LastTenUrlsToString(Queue<string> urls)
         {
             if (urls.Count == 0)
             {

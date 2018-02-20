@@ -43,7 +43,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
                         }
                         else
                         {
-                            if (data.QueuedUrls.Contains(currLocValue))
+                            if (!data.QueuedUrls.Contains(currLocValue))
                             {
                                 CloudQueueMessage url = new CloudQueueMessage(currLocValue);
                                 storage.UrlQueue.AddMessage(url);

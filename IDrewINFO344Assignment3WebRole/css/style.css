@@ -1,2 +1,18 @@
-﻿body {
+﻿ul {
+    list-style: none;
 }
+
+.header{
+    padding: 20px 0;
+    text-align: center;
+}
+
+.main {
+    
+}
+
+.report {
+    background-color: lightblue;
+    border: 1px solid black;
+}
+

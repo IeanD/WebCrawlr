@@ -67,7 +67,7 @@ namespace IDrewINFO344Assignment3WorkerRole
 
             // Get the current cmd from the cmd table;
             // Re-execute cmd query periodically until current cmd exists
-            while (_storageManager.GetCurrentCmd() == null)
+            while (_storageManager.GetCurrentCmd() != "START")
             {
                 Thread.Sleep(5000);
             }
@@ -76,10 +76,7 @@ namespace IDrewINFO344Assignment3WorkerRole
             // and populate the xmlQueue and _disallowed list
             if (_storageManager.GetCurrentCmd() == "START")
             {
-                /// FOR DEBUG
-                //ParseHtml("https://www.cnn.com/news", urlQueue, urlTable, errTable);
-
-                RobotsTxtCrawlr.CrawlRobotsTxt(ref _crawlrData, ref _storageManager);
+                Startup();
             }
 
             // Recurring work
@@ -105,6 +102,7 @@ namespace IDrewINFO344Assignment3WorkerRole
                             _crawlrData,
                             _storageManager
                         );
+                        _statusManager.UpdateQueueSize(_storageManager, _crawlrData.NumXmlsQueued, _crawlrData.NumUrlsQueued);
 
                         Thread.Sleep(50);
                     }
@@ -118,13 +116,13 @@ namespace IDrewINFO344Assignment3WorkerRole
 
                         _storageManager.UrlQueue.DeleteMessage(nextUrlMsg);
                         _crawlrData.NumUrlsQueued--;
-                        _crawlrData.NumUrlsCrawled++;
 
                         _statusManager.UpdateCrawlrStatus(
                             "Crawling",
                             _crawlrData,
                             _storageManager
                         );
+                        _statusManager.UpdateQueueSize(_storageManager, _crawlrData.NumXmlsQueued, _crawlrData.NumUrlsQueued);
 
                         Thread.Sleep(50);
                     }
@@ -133,10 +131,12 @@ namespace IDrewINFO344Assignment3WorkerRole
                 {
                     _storageManager.ClearAll();
                     _statusManager.UpdateCrawlrStatus(
-                        "Cleared",
+                        "CLEAR",
                         _crawlrData,
                         _storageManager
                     );
+                    Thread.Sleep(20000);
+
                     try
                     {
                         while (_storageManager.GetCurrentCmd() == "CLEAR")
@@ -147,15 +147,33 @@ namespace IDrewINFO344Assignment3WorkerRole
                     finally
                     {
                         InitializeCrawlrComponents();
+                        Startup();
                     }
                 }
                 else
                 {
+                    _statusManager.UpdateCrawlrStatus(
+                        "Idle",
+                        _crawlrData,
+                        _storageManager
+                    );
+
                     Thread.Sleep(5000);
                 }
             }
 
             Thread.Sleep(1000);
+        }
+
+        private void Startup()
+        {
+            _statusManager.UpdateCrawlrStatus(
+                "Initializing",
+                _crawlrData,
+                _storageManager
+            );
+            RobotsTxtCrawlr.CrawlRobotsTxt(ref _crawlrData, ref _storageManager);
+            _statusManager.UpdateQueueSize(_storageManager, _crawlrData.NumXmlsQueued, _crawlrData.NumUrlsQueued);
         }
 
         private void InitializeCrawlrComponents()

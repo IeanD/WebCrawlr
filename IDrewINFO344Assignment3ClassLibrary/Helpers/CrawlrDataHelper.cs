@@ -8,7 +8,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Helpers
         public HashSet<string> QueuedXmls { get; private set; }
         public HashSet<string> QueuedUrls { get; private set; }
         public HashSet<string> AddedUrls { get; private set; }
-        public Stack<string> LastTenUrls { get; private set; }
+        public Queue<string> LastTenUrls { get; private set; }
         public int NumXmlsQueued { get; set; }
         public int NumUrlsQueued { get; set; }
         public int NumUrlsCrawled { get; set; }
@@ -19,7 +19,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Helpers
             this.QueuedXmls = new HashSet<string>();
             this.QueuedUrls = new HashSet<string>();
             this.AddedUrls = new HashSet<string>();
-            this.LastTenUrls = new Stack<string>(10);
+            this.LastTenUrls = new Queue<string>(10);
             this.NumXmlsQueued = 0;
             this.NumUrlsQueued = 0;
             this.NumUrlsCrawled = 0;

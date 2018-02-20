@@ -11,8 +11,6 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
 {
     public class UrlCrawlr
     {
-
-
         public static void CrawlUrl(ref CrawlrDataHelper data, ref CrawlrStorageManager storage, string url)
         {
             if (data.ChkIfUriAllowed(url))
@@ -76,6 +74,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
                             }
                             if (IsInProperDomain(currHref)
                                 && !data.QueuedUrls.Contains(currHref)
+                                && !data.AddedUrls.Contains(currHref)
                                 && validDateIfExists)
                             {
                                 CloudQueueMessage urlMsg = new CloudQueueMessage(currHref);
@@ -86,19 +85,27 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
                         }
                     }
 
+                    if (!data.AddedUrls.Contains(url))
+                    {
+                        data.NumUrlsCrawled++;
+                        data.AddedUrls.Add(url);
+                    }
                     FoundUrl finishedUrl = new FoundUrl(urlPageTitle, (urlLastMod != null ? urlLastMod.ToString() : "NULL"), url);
-                    TableOperation insertUrl = TableOperation.Insert(finishedUrl);
+                    UrlTableCount newCount = new UrlTableCount(data.NumUrlsCrawled);
+                    TableOperation insertUrl = TableOperation.InsertOrReplace(finishedUrl);
+                    TableOperation insertCount = TableOperation.InsertOrReplace(newCount);
                     storage.UrlTable.Execute(insertUrl);
+                    storage.UrlTable.Execute(insertCount);
                     if (data.LastTenUrls.Count == 10)
                     {
-                        data.LastTenUrls.Pop();
+                        data.LastTenUrls.Dequeue();
                     }
-                    data.LastTenUrls.Push(url);
+                    data.LastTenUrls.Enqueue(url);
                 }
                 catch (Exception ex)
                 {
                     ErrorUrl errorUrl = new ErrorUrl(url, ex.ToString());
-                    TableOperation insertErrorUrl = TableOperation.Insert(errorUrl);
+                    TableOperation insertErrorUrl = TableOperation.InsertOrReplace(errorUrl);
                     storage.ErrorTable.Execute(insertErrorUrl);
                 }
 

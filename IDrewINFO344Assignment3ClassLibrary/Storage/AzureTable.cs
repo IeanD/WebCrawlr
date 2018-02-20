@@ -12,7 +12,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connString);
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
             CloudTable table = tableClient.GetTableReference(tableName);
-            table.CreateIfNotExists();
+            table.CreateIfNotExistsAsync();
 
             this._table = table;
         }

@@ -53,9 +53,11 @@
     <Compile Include="Storage\CrawlrStorageManager.cs" />
     <Compile Include="Crawlrs\UrlCrawlr.cs" />
     <Compile Include="Crawlrs\XmlCrawlr.cs" />
+    <Compile Include="Storage\Entities\CrawlrQueueSize.cs" />
     <Compile Include="Storage\Entities\ErrorUrl.cs" />
     <Compile Include="Storage\Entities\FoundUrl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Storage\Entities\UrlTableCount.cs" />
     <Compile Include="Storage\Entities\WorkerRoleStatus.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -19,14 +19,14 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
         public void UpdateCrawlrStatus(string currentStatus, CrawlrDataHelper data, CrawlrStorageManager storage)
         {
             WorkerRoleStatus currStatusEntity;
-            if (currentStatus == "CLEARED")
+            if (currentStatus == "CLEAR")
             {
                 currStatusEntity = new WorkerRoleStatus(
                     currentStatus,
                     (int)_cpuTime.NextValue(),
                     (int)_memoryFree.NextValue(),
                     0,
-                    new System.Collections.Generic.Stack<string>()
+                    new System.Collections.Generic.Queue<string>()
                 );
             }
             else
@@ -42,6 +42,14 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
 
             TableOperation insertStatus = TableOperation.InsertOrReplace(currStatusEntity);
             storage.StatusTable.Execute(insertStatus);
+
+        }
+
+        public void UpdateQueueSize(CrawlrStorageManager storage, int xmlQueueSize, int urlQueueSize)
+        {
+            CrawlrQueueSize newSize = new CrawlrQueueSize(xmlQueueSize, urlQueueSize);
+            TableOperation insertQueueSize = TableOperation.InsertOrReplace(newSize);
+            storage.StatusTable.Execute(insertQueueSize);
         }
     }
 }

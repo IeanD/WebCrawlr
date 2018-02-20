@@ -51,7 +51,10 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
 
         public void IssueCmd(string cmd, string robotsTxt)
         {
+            CrawlrCmd nextCmd = new CrawlrCmd(cmd, robotsTxt);
+            TableOperation insertCmd = TableOperation.InsertOrReplace(nextCmd);
 
+            _cmdTable.Execute(insertCmd);
         }
 
         public string GetCurrentCmd()
@@ -70,8 +73,27 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
             }
         }
 
+        public string GetCurrentRobotsTxt()
+        {
+            var currentCmd = _cmdTable.ExecuteQuery(_cmdQuery);
+
+            if (currentCmd.Any())
+            {
+
+                return currentCmd.First().Domain;
+            }
+            else
+            {
+
+                return null;
+            }
+        }
+
         public void ClearAll()
         {
+            TableOperation clearQueue = 
+                TableOperation.InsertOrReplace(new CrawlrQueueSize(0, 0));
+            StatusTable.Execute(clearQueue);
             XmlQueue.Clear();
             UrlQueue.Clear();
             UrlTable.Delete();
