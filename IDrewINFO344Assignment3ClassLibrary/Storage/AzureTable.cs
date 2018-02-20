@@ -1,7 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace IDrewINFO344Assignment3ClassLibrary
+namespace IDrewINFO344Assignment3ClassLibrary.Storage
 {
     public class AzureTable
     {

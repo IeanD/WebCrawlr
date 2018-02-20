@@ -1,11 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace IDrewINFO344Assignment3ClassLibrary
+namespace IDrewINFO344Assignment3ClassLibrary.Storage.Entities
 {
     public class WorkerRoleStatus : TableEntity
     {
@@ -36,7 +32,7 @@ namespace IDrewINFO344Assignment3ClassLibrary
         {
             if (urls.Count == 0)
             {
-                return "None (loading)";
+                return "None";
             }
             string result = "";
             int numUrlsInStack = urls.Count;

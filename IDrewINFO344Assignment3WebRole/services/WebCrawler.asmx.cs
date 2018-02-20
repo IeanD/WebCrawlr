@@ -1,11 +1,10 @@
 ﻿using IDrewINFO344Assignment3ClassLibrary;
-using Microsoft.WindowsAzure.Storage.Queue;
+using IDrewINFO344Assignment3ClassLibrary.Storage;
+using IDrewINFO344Assignment3ClassLibrary.Storage.Entities;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
-using System.Net;
 using System.Web.Script.Services;
 using System.Web.Services;
 
@@ -21,6 +20,9 @@ namespace IDrewINFO344Assignment3WebRole.services
     [ScriptService]
     public class WebCrawler : WebService
     {
+        private CrawlrStorageManager _storageManager;
+        private CrawlrStatusManager _statusManager;
+
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public string StartCrawling(string robotsTxtUrl)
@@ -28,10 +30,10 @@ namespace IDrewINFO344Assignment3WebRole.services
             try
             {
                 CloudTable cmdTable = new AzureTable(
-                    ConfigurationManager.AppSettings["StorageConnectionString"], "cmdtable")
+                    ConfigurationManager.AppSettings["StorageConnectionString"], "crawlrcmdtable")
                     .GetTable();
 
-                CrawlerCmd cmd = new CrawlerCmd("START", robotsTxtUrl);
+                CrawlrCmd cmd = new CrawlrCmd("START", robotsTxtUrl);
 
                 TableOperation insert = TableOperation.InsertOrReplace(cmd);
                 cmdTable.Execute(insert);
@@ -69,6 +71,13 @@ namespace IDrewINFO344Assignment3WebRole.services
             }
 
             return status;
+        }
+
+        private void InitializeCrawlrComponents()
+        {
+            this._storageManager
+                            = new CrawlrStorageManager(ConfigurationManager.AppSettings["StorageConnectionString"]);
+            this._statusManager = new CrawlrStatusManager();
         }
     }
 }

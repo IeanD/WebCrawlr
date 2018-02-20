@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IDrewINFO344Assignment3ClassLibrary
+namespace IDrewINFO344Assignment3ClassLibrary.Storage.Entities
 {
-    public class CrawlerCmd : TableEntity
+    public class CrawlrCmd : TableEntity
     {
         public string Cmd { get; set; }
         public string Domain { get; set; }
 
-        public CrawlerCmd(string cmd, string domain)
+        public CrawlrCmd(string cmd, string domain)
         {
             this.PartitionKey = "webCrawlr";
             this.RowKey = "workerRoleCmd";
@@ -21,7 +21,7 @@ namespace IDrewINFO344Assignment3ClassLibrary
             this.Domain = domain;
         }
 
-        public CrawlerCmd()
+        public CrawlrCmd()
         {
 
         }
