@@ -16,3 +16,12 @@
     border: 1px solid black;
 }
 
+.xml-warning {
+    font-size: 6pt;
+    text-align: right;
+    color: gray;
+}
+
+.section-header {
+    padding-top: 10px;
+}

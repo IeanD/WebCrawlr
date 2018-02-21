@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace IDrewINFO344Assignment3ClassLibrary.Storage.Entities
 {
+    /// <summary>
+    ///     A TableEntity for a crawler URL table; stores how many URLs are
+    ///     currently in the table.
+    /// </summary>
     public class UrlTableCount : TableEntity
     {
         public int NumUrlsInTable { get; set; }

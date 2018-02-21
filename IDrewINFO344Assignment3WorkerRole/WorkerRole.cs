@@ -11,11 +11,20 @@ using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace IDrewINFO344Assignment3WorkerRole
 {
+    /// <summary>
+    ///     Worker role for webCrawlr, a URL crawler mostly focused on crawling cnn.com.
+    ///     The role will start by reading a given robots.txt URL, putting all found sitemaps into
+    ///     an Azure Queue, then parsing those sitemaps to build a queue of URLs to crawl. It will
+    ///     then parse each URL one at a time, adding any found URLs to the queue, then adding the
+    ///     parsed URLs page title and URL to an Azure Table for search. webCrawlr will do its best
+    ///     to avoid sitemaps/URLs older than two months.
+    /// </summary>
     public class WorkerRole : RoleEntryPoint
     {
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
 
+        // Helper for communicating with Azure storage & keeping track of seen URLs/XMLs
         private CrawlrStorageManager _storageManager;
         private CrawlrStatusManager _statusManager;
         private CrawlrDataHelper _crawlrData;
@@ -87,6 +96,7 @@ namespace IDrewINFO344Assignment3WorkerRole
                 // Do work if current cmd is still "start"
                 if (_storageManager.GetCurrentCmd() == "START")
                 {
+                    // Process all XMLs (sitemaps) found
                     while (_crawlrData.NumXmlsQueued > 0 && _storageManager.GetCurrentCmd() == "START")
                     {
                         CloudQueueMessage nextXmlMsg = _storageManager.XmlQueue.GetMessage();
@@ -97,6 +107,7 @@ namespace IDrewINFO344Assignment3WorkerRole
                         _storageManager.XmlQueue.DeleteMessage(nextXmlMsg);
                         _crawlrData.NumXmlsQueued--;
 
+                        // Update worker role status
                         _statusManager.UpdateCrawlrStatus(
                             "Loading",
                             _crawlrData,
@@ -107,6 +118,7 @@ namespace IDrewINFO344Assignment3WorkerRole
                         Thread.Sleep(50);
                     }
 
+                    // Process all URLs in queue
                     while (_crawlrData.NumUrlsQueued > 0 && _storageManager.GetCurrentCmd() == "START")
                     {
                         CloudQueueMessage nextUrlMsg = _storageManager.UrlQueue.GetMessage();
@@ -117,6 +129,7 @@ namespace IDrewINFO344Assignment3WorkerRole
                         _storageManager.UrlQueue.DeleteMessage(nextUrlMsg);
                         _crawlrData.NumUrlsQueued--;
 
+                        // Update worker role status
                         _statusManager.UpdateCrawlrStatus(
                             "Crawling",
                             _crawlrData,
@@ -129,16 +142,19 @@ namespace IDrewINFO344Assignment3WorkerRole
                 }
                 else if (_storageManager.GetCurrentCmd() == "CLEAR")
                 {
+                    // If the "CLEAR" command is found, clear all queues and tables.
                     _storageManager.ClearAll();
                     _statusManager.UpdateCrawlrStatus(
                         "CLEAR",
                         _crawlrData,
                         _storageManager
                     );
+                    // Give Azure time to delete tables.
                     Thread.Sleep(20000);
 
                     try
                     {
+                        // Idle while waiting for next command.
                         while (_storageManager.GetCurrentCmd() == "CLEAR")
                         {
                             Thread.Sleep(10000);
@@ -146,12 +162,14 @@ namespace IDrewINFO344Assignment3WorkerRole
                     }
                     finally
                     {
+                        // Reinitialize worker role.
                         InitializeCrawlrComponents();
                         Startup();
                     }
                 }
                 else
                 {
+                    // Idle worker role (for unimplemented 'pause' functionality).
                     _statusManager.UpdateCrawlrStatus(
                         "Idle",
                         _crawlrData,
@@ -165,6 +183,7 @@ namespace IDrewINFO344Assignment3WorkerRole
             Thread.Sleep(1000);
         }
 
+        // Perform the initial robots.txt crawl.
         private void Startup()
         {
             _statusManager.UpdateCrawlrStatus(
@@ -176,6 +195,7 @@ namespace IDrewINFO344Assignment3WorkerRole
             _statusManager.UpdateQueueSize(_storageManager, _crawlrData.NumXmlsQueued, _crawlrData.NumUrlsQueued);
         }
 
+        // Refresh storage and helpers.
         private void InitializeCrawlrComponents()
         {
             this._storageManager

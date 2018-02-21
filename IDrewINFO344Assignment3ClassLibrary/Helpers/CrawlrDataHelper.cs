@@ -2,6 +2,13 @@
 
 namespace IDrewINFO344Assignment3ClassLibrary.Helpers
 {
+    /// <summary>
+    ///     Helper for crawler (webCrawlr).
+    ///     Stores: a list of disallowed strings for a crawler, HashSets of already queued XMLs & URLs
+    ///     for quick comparison, a HashSet of URLs already added to azure table storage for comparison,
+    ///     and counters for number of XMLs queued, number of URLs queued, and number of URLs crawled.
+    ///     Additionally contains a check (bool) method to see if a given URI is disallowed or not.
+    /// </summary>
     public class CrawlrDataHelper
     {
         public List<string> DisallowedStrings { get; private set; }

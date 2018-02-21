@@ -23,13 +23,13 @@
                     <button type="button" class="btn btn-outline-secondary" id="stopCrawlButton" onclick="stopCrawler()"><i class="fa fa-stop-circle" aria-hidden="true"></i></button>
                 </div>
                 <div class="input-group-append">
-                    <button type="submit" class="btn btn-outline-secondary" id="urlCrawlButton"><i class="fa fa-play" aria-hidden="true"></i></button>
+                    <button type="submit" class="btn btn-outline-secondary" id="urlCrawlButton"><i class="fa fa-play-circle" aria-hidden="true"></i></button>
                 </div>
             </div>
             <div class="container">
                 <div class="row">
                     <div class="col-sm report">
-                        <h2>Worker Role Status</h2>
+                        <h2 class="section-header">Worker Role Status</h2>
                         <hr />
                         <ul>
                             <li id="workerRoleStatus">please wait...</li>
@@ -38,7 +38,7 @@
                         </ul>
                     </div>
                     <div class="col-sm report">
-                        <h2>Queue Information</h2>
+                        <h2 class="section-header">Queue Information</h2>
                         <hr />
                         <ul>
                             <li id="sizeOfXmlQueue">please wait...</li>
@@ -46,24 +46,25 @@
                             <li id="sizeOfIndex"></li>
                             <li id="numberUrlsCrawled"></li>
                         </ul>
+                        <p class="xml-warning">If there hasn't been an update in a while, the Crawler is likely parsing a <strong>long</strong> XML document.</p>
                     </div>
                     <div class="col-sm report">
-                        <h2>Last 10 URLs</h2>
+                        <h2 class="section-header">Last 10 URLs</h2>
                         <hr />
-                        <ul id="lastTenUrls">
+                        <ol id="lastTenUrls">
                             <li>please wait...</li>
-                        </ul>
+                        </ol>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-12 report">
-                        <h2>Search Crawled URLs</h2>
+                        <h2 class="section-header">Search Crawled URLs</h2>
                         <hr />
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <span class="input-group-text search-label">URL Title Search:</span>
                             </div>
-                            <input type="text" class="form-control" id="urlSearch" aria-label="URL" placeholder="absolute URL, e.g. &quot;http://www.cnn.com/index.html;">
+                            <input type="text" class="form-control" id="urlSearch" aria-label="URL" placeholder="absolute URL, e.g. &quot;http://www.cnn.com/index.html&quot;">
                             <div class="input-group-append">
                                 <button type="button" class="btn btn-outline-secondary" id="urlSearchButton"><i class="fa fa-search" aria-hidden="true"></i></button>
                             </div>
@@ -75,7 +76,7 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-12 report">
-                        <h2>Errors Found</h2>
+                        <h2 class="section-header">Errors Found</h2>
                         <hr />
                         <div id="errorsWrapper">
 

@@ -1,5 +1,4 @@
-﻿using IDrewINFO344Assignment3ClassLibrary;
-using IDrewINFO344Assignment3ClassLibrary.Storage;
+﻿using IDrewINFO344Assignment3ClassLibrary.Storage;
 using IDrewINFO344Assignment3ClassLibrary.Storage.Entities;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
@@ -11,7 +10,7 @@ using System.Web.Services;
 namespace IDrewINFO344Assignment3WebRole.services
 {
     /// <summary>
-    /// Summary description for WebCrawler
+    ///     ASMX Script Service for webCrawlr, a URL crawler tailored towards crawling cnn.com.
     /// </summary>
     [WebService(Namespace = "http://tempuri.org/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
@@ -20,10 +19,20 @@ namespace IDrewINFO344Assignment3WebRole.services
     [ScriptService]
     public class WebCrawler : WebService
     {
+        // Initialize quick access to relevant Azure Storage, as well as store last given robots.txt URL.
         private CrawlrStorageManager _storageManager
             = new CrawlrStorageManager(ConfigurationManager.AppSettings["StorageConnectionString"]);
         private static string _robotsTxtUrl;
 
+        /// <summary>
+        ///     Give the relevant command to the worker role to start crawling the given robots.txt
+        /// </summary>
+        /// <param name="robotsTxtUrl">
+        ///     robots.txt URL to crawl as string.
+        /// </param>
+        /// <returns>
+        ///     Confirmation of initialization of crawl as string, or thrown exception as string.
+        /// </returns>
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public string StartCrawling(string robotsTxtUrl)
@@ -43,22 +52,12 @@ namespace IDrewINFO344Assignment3WebRole.services
             }
         }
 
-        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        [WebMethod]
-        public string PauseCrawling()
-        {
-            try
-            {
-                _storageManager.IssueCmd("PAUSE", _robotsTxtUrl);
-
-                return ("Pausing crawl of " + _robotsTxtUrl);
-            }
-            catch (Exception ex)
-            {
-                return "Error: " + ex.ToString();
-            }
-        }
-
+        /// <summary>
+        ///     Tells the worker role to stop crawling and await further instructions.
+        /// </summary>
+        /// <returns>
+        ///     Confirmation of stopping of crawl as string, or thrown exception as string.
+        /// </returns>
         [ScriptMethod(UseHttpGet = true, ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public string StopCrawling()
@@ -75,6 +74,15 @@ namespace IDrewINFO344Assignment3WebRole.services
             }
         }
 
+        /// <summary>
+        ///     Query the crawler's Error Table for any found errors while crawling.
+        /// </summary>
+        /// <returns>
+        ///     A list of formatted strings containg an URLs that threw exceptions as well as
+        ///     the exception thrown, or the exception thrown from this method. If the crawler was
+        ///     recently stopped, this method will throw an exception as the Error Table is deleted
+        ///     and remade.
+        /// </returns>
         [ScriptMethod(UseHttpGet = true, ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public List<string> GetErrors()
@@ -93,13 +101,19 @@ namespace IDrewINFO344Assignment3WebRole.services
             catch (Exception ex)
             {
 
-                results.Add("WebCrawler.asmx (if you just cleared/stopped the crawler, " +
+                results.Add("WebCrawler.asmx \n (if you just cleared/stopped the crawler, " +
                     "this is normal) | " + ex.ToString());
             }
 
             return results;
         }
 
+        /// <summary>
+        ///     Retrieves and returns a list of the last ten URLs crawled by the worker role.
+        /// </summary>
+        /// <returns>
+        ///     A list of the last ten URLs crawled by the worker role as strings.
+        /// </returns>
         [ScriptMethod(UseHttpGet = true, ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public List<string> GetLastTenUrls()
@@ -130,6 +144,13 @@ namespace IDrewINFO344Assignment3WebRole.services
             return result;
         }
 
+        /// <summary>
+        ///     Retrieves from azure storage the number of URLs that have been crawled by
+        ///     the worker role.
+        /// </summary>
+        /// <returns>
+        ///     The number of URLs crawled as an int.
+        /// </returns>
         [ScriptMethod(UseHttpGet = true, ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public int GetNumCrawledUrls()
@@ -150,6 +171,14 @@ namespace IDrewINFO344Assignment3WebRole.services
             return result;
         }
 
+        /// <summary>
+        ///     Retrieves from azure storage the current size of the URL queue and
+        ///     XML queue.
+        /// </summary>
+        /// <returns>
+        ///     A list<int>, two long; first number is the XML queue size, second is
+        ///     URL queue size.
+        /// </returns>
         [ScriptMethod(UseHttpGet = true, ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public List<int> GetQueueSizes()
@@ -171,6 +200,12 @@ namespace IDrewINFO344Assignment3WebRole.services
             return result;
         }
 
+        /// <summary>
+        ///     Retrieves the current status of the worker role from Azure Storage.
+        /// </summary>
+        /// <returns>
+        ///     Worker role's various status reports as a list<string>
+        /// </returns>
         [ScriptMethod(UseHttpGet = true, ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public List<string> GetWorkerRoleStatus()
@@ -202,6 +237,16 @@ namespace IDrewINFO344Assignment3WebRole.services
             return status;
         }
 
+        /// <summary>
+        ///     Check azure storage to see if a given URL has been crawled. If so, returns
+        ///     the given URLs page title.
+        /// </summary>
+        /// <param name="url">
+        ///     absolute URL of page, as string.
+        /// </param>
+        /// <returns>
+        ///     List<string> containing the page title matching the given URL, if found.
+        /// </returns>
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
         public List<string> SearchForUrlTitle(string url)

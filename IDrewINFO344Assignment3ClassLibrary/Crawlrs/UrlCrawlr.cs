@@ -5,12 +5,31 @@ using IDrewINFO344Assignment3ClassLibrary.Storage.Entities;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
 {
+    /// <summary>
+    ///     Helper class for webCrawlr.
+    ///     This class can crawl a given URL, placing all found URLs into queue and placing the
+    ///     given URLS page title and URL into Azure table storage for later queries.
+    /// </summary>
     public class UrlCrawlr
     {
+        /// <summary>
+        ///     Crawls a given URL, queueing all found URLs and storing information about
+        ///     the given URL for later querying.
+        /// </summary>
+        /// <param name="data">
+        ///     Crawler data helper. Ref.
+        /// </param>
+        /// <param name="storage">
+        ///     Crawler azure storage helper. Ref.
+        /// </param>
+        /// <param name="url">
+        ///     The given URL to crawl.
+        /// </param>
         public static void CrawlUrl(ref CrawlrDataHelper data, ref CrawlrStorageManager storage, string url)
         {
             if (data.ChkIfUriAllowed(url))
@@ -42,7 +61,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
                     var urlLastModNode = currDoc.DocumentNode.Descendants("meta")
                         .Select(y => y)
                         .Where(y => y.Attributes.Contains("name"))
-                        .Where(y => y.Attributes["name"].Value == "lastmod")
+                        .Where(y => y.Attributes["name"].Value == "pubdate")
                         .ToList();
 
                     DateTime? urlLastMod = null;
@@ -52,37 +71,19 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
                             urlLastModNode.First().Attributes["content"].Value);
                     }
 
+                    List<string> urlsToQueue = new List<string>();
+
                     foreach (var urlNode in urlNodes)
                     {
                         if (urlNode.Attributes.Contains("href"))
                         {
-                            var currHref = urlNode.Attributes["href"].Value;
-                            bool validDateIfExists = true;
-                            if (currHref.StartsWith(@"//"))
-                            {
-                                string domain = new Uri(url).Host;
-                                currHref = @"http:" + currHref;
-                            }
-                            else if (currHref.StartsWith(@"/"))
-                            {
-                                string domain = new Uri(url).Host;
-                                currHref = @"http://" + domain + currHref;
-                            }
-                            if (urlLastMod != null)
-                            {
-                                validDateIfExists = (urlLastMod >= DateTime.Now - TimeSpan.FromDays(62));
-                            }
-                            if (IsInProperDomain(currHref)
-                                && !data.QueuedUrls.Contains(currHref)
-                                && !data.AddedUrls.Contains(currHref)
-                                && validDateIfExists)
-                            {
-                                CloudQueueMessage urlMsg = new CloudQueueMessage(currHref);
-                                storage.UrlQueue.AddMessage(urlMsg);
-                                data.QueuedUrls.Add(currHref);
-                                data.NumUrlsQueued++;
-                            }
+                            urlsToQueue.Add(urlNode.Attributes["href"].Value);
                         }
+                    }
+
+                    foreach (string newUrl in urlsToQueue)
+                    {
+                        ChkAndAddUrl(newUrl, url, urlLastMod, ref data, ref storage);
                     }
 
                     if (!data.AddedUrls.Contains(url))
@@ -112,7 +113,6 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
             }
         }
 
-
         private static bool IsInProperDomain(string currHref)
         {
             if (currHref.Contains("cnn.com") || currHref.Contains("bleacherreport.com"))
@@ -129,7 +129,53 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
             {
                 return false;
             }
+        }
 
+        /// <summary>
+        ///     Checks to see if a given URL has already been queued/parsed; if not, adds to queue.
+        /// </summary>
+        /// <param name="currHref">
+        ///     URL to check.
+        /// </param>
+        /// <param name="currUri">
+        ///     Domain space of URL.
+        /// </param>
+        /// <param name="urlLastMod">
+        ///     URLs lastmod/published date, if known. Nullable.
+        /// </param>
+        /// <param name="data">
+        ///     Crawler data helper. Ref.
+        /// </param>
+        /// <param name="storage">
+        ///     Crawler azure storage helper. Ref.
+        /// </param>
+        public static void ChkAndAddUrl(string currHref, string currUri, 
+            DateTime? urlLastMod, ref CrawlrDataHelper data, ref CrawlrStorageManager storage)
+        {
+            bool validDateIfExists = true;
+            string domain = new Uri(currUri).Host;
+            if (currHref.StartsWith(@"//"))
+            {
+                currHref = @"http:" + currHref;
+            }
+            else if (currHref.StartsWith(@"/"))
+            {
+                currHref = @"http://" + domain + currHref;
+            }
+            if (urlLastMod != null)
+            {
+                validDateIfExists = (urlLastMod >= DateTime.Now - TimeSpan.FromDays(62));
+            }
+            if (IsInProperDomain(currHref)
+                && !data.QueuedUrls.Contains(currHref)
+                && !data.AddedUrls.Contains(currHref)
+                && validDateIfExists)
+            {
+                CloudQueueMessage urlMsg = new CloudQueueMessage(currHref);
+                storage.UrlQueue.AddMessage(urlMsg);
+                data.QueuedUrls.Add(currHref);
+                data.NumUrlsQueued++;
+            }
         }
     }
 }

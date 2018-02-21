@@ -1,12 +1,11 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IDrewINFO344Assignment3ClassLibrary.Storage.Entities
 {
+    /// <summary>
+    ///     A TableEntity for a command table; stores a given crawler Worker Role command,
+    ///     as well as a robots.txt URL for a given Worker Role to work with.
+    /// </summary>
     public class CrawlrCmd : TableEntity
     {
         public string Cmd { get; set; }

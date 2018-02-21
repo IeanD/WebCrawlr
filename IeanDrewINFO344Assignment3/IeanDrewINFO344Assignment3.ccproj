@@ -57,10 +57,14 @@
   <ItemGroup>
     <Folder Include="IDrewINFO344Assignment3WebRoleContent\" />
     <Folder Include="IDrewINFO344Assignment3WorkerRoleContent\" />
+    <Folder Include="Profiles" />
   </ItemGroup>
   <ItemGroup>
     <DiagnosticsConfiguration Include="IDrewINFO344Assignment3WebRoleContent\diagnostics.wadcfgx" />
     <DiagnosticsConfiguration Include="IDrewINFO344Assignment3WorkerRoleContent\diagnostics.wadcfgx" />
+  </ItemGroup>
+  <ItemGroup>
+    <PublishProfile Include="Profiles\ieandrewcrawlrProduction.azurePubxml" />
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>

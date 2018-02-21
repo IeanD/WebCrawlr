@@ -5,6 +5,12 @@ using System.Diagnostics;
 
 namespace IDrewINFO344Assignment3ClassLibrary.Storage
 {
+    /// <summary>
+    ///     Helper object for managing the status of a given crawler (webCrawlr). Maintains
+    ///     RAM and CPU PerformanceCounters. UpdateCrawlrStatus(...) takes a status as a string,
+    ///     then posts the status with CPU counters to the crawler's status table; UpdateQueueSize(...)
+    ///     takes two ints and updates the status table with the current size of the XML and URL queue.
+    /// </summary>
     public class CrawlrStatusManager
     {
         private PerformanceCounter _memoryFree;

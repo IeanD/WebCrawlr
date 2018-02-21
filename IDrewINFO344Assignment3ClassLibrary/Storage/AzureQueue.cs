@@ -3,7 +3,9 @@ using Microsoft.WindowsAzure.Storage.Queue;
 
 namespace IDrewINFO344Assignment3ClassLibrary.Storage
 {
-
+    /// <summary>
+    ///     Quick Azure Queue reference builder. Initializes queue if DNE.
+    /// </summary>
     public class AzureQueue
     {
         private CloudQueue _queue;

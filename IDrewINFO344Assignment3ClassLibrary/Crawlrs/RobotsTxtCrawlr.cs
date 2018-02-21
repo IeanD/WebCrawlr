@@ -7,13 +7,28 @@ using System.Net;
 
 namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
 {
+    /// <summary>
+    ///     Helper class for crawling a robots.txt URL.
+    ///     This class will load a robots.txt from a given URL, place all relevant sitemaps into queue,
+    ///     and build a list of disallowed strings.
+    /// </summary>
     public class RobotsTxtCrawlr
     {
+        /// <summary>
+        ///     Crawls a given robots.txt, adding all sitemaps to queue.
+        /// </summary>
+        /// <param name="data">
+        ///     Crawler data helper. Ref.
+        /// </param>
+        /// <param name="storage">
+        ///     Crawler azure storage helper. Ref.
+        /// </param>
         public static void CrawlRobotsTxt(ref CrawlrDataHelper data, ref CrawlrStorageManager storage)
         {
             string url = storage.GetCurrentRobotsTxt();
             CrawlSpecificRobotsTxt(url, ref data, ref storage);
 
+            // Include bleacherreport.com (formerly cnn.com/sports) if crawling cnn.com
             if (storage.GetCurrentRobotsTxt().Contains("cnn"))
             {
                 CrawlSpecificRobotsTxt("http://www.bleacherreport.com/robots.txt", ref data, ref storage);

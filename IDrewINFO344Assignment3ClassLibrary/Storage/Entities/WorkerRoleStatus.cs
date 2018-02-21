@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace IDrewINFO344Assignment3ClassLibrary.Storage.Entities
 {
+    /// <summary>
+    ///     A TableEntity for a crawler status table; stores the worker role's current
+    ///     status ("INITIALIZING", "LOADING", "CLEARED (idle)"), the worker role's current
+    ///     CPU and RAM usage, the number of URLs crawled by the worker role, and the last ten
+    ///     URLs crawled.
+    /// </summary>
     public class WorkerRoleStatus : TableEntity
     {
         public string CurrStatus { get; set; }

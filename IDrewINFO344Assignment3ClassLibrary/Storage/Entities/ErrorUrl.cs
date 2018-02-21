@@ -3,6 +3,10 @@ using System;
 
 namespace IDrewINFO344Assignment3ClassLibrary.Storage.Entities
 {
+    /// <summary>
+    ///     A TableEntity for a crawler error table; stores an error's domain, URI 
+    ///     and exception.ToString().
+    /// </summary>
     public class ErrorUrl : TableEntity
     {
         public string Url { get; set; }

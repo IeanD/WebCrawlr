@@ -5,6 +5,12 @@ using System.Linq;
 
 namespace IDrewINFO344Assignment3ClassLibrary.Storage
 {
+    /// <summary>
+    ///     Storage manager for a given crawler (webCrawlr). Initiates and tracks all necessary
+    ///     Azure Storage items (XML Queue, URL Queue, Error Table, URL Table, Status Table, Command Table).
+    ///     Can grab most recent command from the Command Table, issue a command to the command table,
+    ///     grab the current robots.txt to crawl, and clear all queues & necessary tables.
+    /// </summary>
     public class CrawlrStorageManager
     {
         private string _connectionString;
@@ -16,6 +22,14 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
         public CloudTable UrlTable { get; private set; }
         public CloudTable StatusTable { get; private set; }
 
+        /// <summary>
+        ///     Initiates all necessary Azure Storage items (XML Queue, URL Queue, Error Table, URL Table,
+        ///     Status Table, Command Table), as well as preps a query to the Command Table to get the 
+        ///     most recent command.
+        /// </summary>
+        /// <param name="connString">
+        ///     Connection string to Azure Storage account.
+        /// </param>
         public CrawlrStorageManager(string connString)
         {
             this._connectionString = connString;
@@ -49,6 +63,15 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
                 .GetTable();
         }
 
+        /// <summary>
+        ///     Issues a given command to the Command Table.
+        /// </summary>
+        /// <param name="cmd">
+        ///     Command to issue as string.
+        /// </param>
+        /// <param name="robotsTxt">
+        ///     robots.txt to crawl / stop crawling as string.
+        /// </param>
         public void IssueCmd(string cmd, string robotsTxt)
         {
             CrawlrCmd nextCmd = new CrawlrCmd(cmd, robotsTxt);
@@ -57,6 +80,12 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
             _cmdTable.Execute(insertCmd);
         }
 
+        /// <summary>
+        ///     Gets the current command from the Command Table, if any.
+        /// </summary>
+        /// <returns>
+        ///     Current command as string, or null.
+        /// </returns>
         public string GetCurrentCmd()
         {
             var currentCmd = _cmdTable.ExecuteQuery(_cmdQuery);
@@ -73,6 +102,12 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
             }
         }
 
+        /// <summary>
+        ///     Gets the robots.txt URI from the Command Table, if any.
+        /// </summary>
+        /// <returns>
+        ///     Current robots.txt URI as string, or null.
+        /// </returns>
         public string GetCurrentRobotsTxt()
         {
             var currentCmd = _cmdTable.ExecuteQuery(_cmdQuery);
@@ -89,6 +124,12 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
             }
         }
 
+        /// <summary>
+        ///     Clears / deletes all relevant crawler information from Azure Storage upon command.
+        ///     Sets the XML & URL Queue sizes to 0, clears the XML & URL Queues, and deletes
+        ///     the URL Table and Error Table. URL and Error Tables must be reinitialized for crawler
+        ///     to function again (handled in worker role).
+        /// </summary>
         public void ClearAll()
         {
             TableOperation clearQueue = 
@@ -99,12 +140,5 @@ namespace IDrewINFO344Assignment3ClassLibrary.Storage
             UrlTable.Delete();
             ErrorTable.Delete();
         }
-        
-        //public bool CmdExists()
-        //{
-        //    var cmd = CmdTable.ExecuteQuery(_cmdQuery);
-
-        //    return cmd.Any();
-        //}
     }
 }
