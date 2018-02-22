@@ -88,11 +88,12 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
 
                     if (!data.AddedUrls.Contains(url))
                     {
-                        data.NumUrlsCrawled++;
                         data.AddedUrls.Add(url);
+                        data.NumUrlsIndexed++;
                     }
+                    data.NumUrlsCrawled++;
                     FoundUrl finishedUrl = new FoundUrl(urlPageTitle, (urlLastMod != null ? urlLastMod.ToString() : "NULL"), url);
-                    UrlTableCount newCount = new UrlTableCount(data.NumUrlsCrawled);
+                    UrlTableCount newCount = new UrlTableCount(data.NumUrlsCrawled, data.NumUrlsIndexed);
                     TableOperation insertUrl = TableOperation.InsertOrReplace(finishedUrl);
                     TableOperation insertCount = TableOperation.InsertOrReplace(newCount);
                     storage.UrlTable.Execute(insertUrl);
@@ -115,7 +116,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Crawlrs
 
         private static bool IsInProperDomain(string currHref)
         {
-            if (currHref.Contains("cnn.com") || currHref.Contains("bleacherreport.com"))
+            if (currHref.Contains("cnn.com") || currHref.Contains("bleacherreport.com/nba"))
             {
 
                 return true;

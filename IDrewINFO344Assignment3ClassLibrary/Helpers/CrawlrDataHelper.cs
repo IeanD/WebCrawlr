@@ -19,6 +19,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Helpers
         public int NumXmlsQueued { get; set; }
         public int NumUrlsQueued { get; set; }
         public int NumUrlsCrawled { get; set; }
+        public int NumUrlsIndexed { get; set; }
 
         public CrawlrDataHelper()
         {
@@ -30,6 +31,7 @@ namespace IDrewINFO344Assignment3ClassLibrary.Helpers
             this.NumXmlsQueued = 0;
             this.NumUrlsQueued = 0;
             this.NumUrlsCrawled = 0;
+            this.NumUrlsIndexed = 0;
         }
 
         public bool ChkIfUriAllowed(string uri)

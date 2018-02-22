@@ -90,7 +90,8 @@ namespace IDrewINFO344Assignment3WebRole.services
             List<string> results = new List<string>();
             CloudTable errorTable = _storageManager.ErrorTable;
 
-            TableQuery<ErrorUrl> errorQuery = new TableQuery<ErrorUrl>();
+            TableQuery<ErrorUrl> errorQuery = new TableQuery<ErrorUrl>()
+                .Take(50);
             try
             {
                 foreach (var error in errorTable.ExecuteQuery(errorQuery))
@@ -153,7 +154,7 @@ namespace IDrewINFO344Assignment3WebRole.services
         /// </returns>
         [ScriptMethod(UseHttpGet = true, ResponseFormat = ResponseFormat.Json)]
         [WebMethod]
-        public int GetNumCrawledUrls()
+        public List<int> GetNumCrawledUrls()
         {
             CloudTable urlTable = _storageManager.UrlTable;
 
@@ -162,10 +163,11 @@ namespace IDrewINFO344Assignment3WebRole.services
                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "UrlTableCount")
                 );
 
-            int result = -1;
+            List<int> result = new List<int>();
             foreach (var statusItem in urlTable.ExecuteQuery(urlNumberQuery))
             {
-                result = statusItem.NumUrlsInTable;
+                result.Add(statusItem.NumUrlsCrawled);
+                result.Add(statusItem.NumUrlsInTable);
             }
 
             return result;

@@ -121,7 +121,6 @@ function refreshAll(e) {
             let currStatusLi = document.getElementById("workerRoleStatus");
             let cpuUsedLi = document.getElementById("cpuUtilized");
             let ramAvailLi = document.getElementById("ramUsed");
-            let NumUrlsLi = document.getElementById("numberUrlsCrawled");
 
             while (currStatusLi.firstChild) {
                 currStatusLi.removeChild(currStatusLi.firstChild);
@@ -132,6 +131,7 @@ function refreshAll(e) {
             while (ramAvailLi.firstChild) {
                 ramAvailLi.removeChild(ramAvailLi.firstChild);
             }
+            let NumUrlsLi = document.getElementById("numberUrlsCrawled");
             while (NumUrlsLi.firstChild) {
                 NumUrlsLi.removeChild(NumUrlsLi.firstChild);
             }
@@ -224,6 +224,29 @@ function refreshAll(e) {
                     lastTenUrlsUl.appendChild(result);
                 }
             }
+        }
+    );
+
+    const numUrlsCrawledUrl = "services/WebCrawler.asmx/GetNumCrawledUrls";
+
+    let numUrlsCrawledInit = {
+        method: 'GET',
+        headers: new Headers({
+            'content-type': 'application/json'
+        })
+    };
+    fetch(numUrlsCrawledUrl, numUrlsCrawledInit)
+        .then(function (response) {
+            return response.json();
+        }).then(function (json) {
+            let NumIndexLi = document.getElementById("sizeOfIndex");
+            while (NumIndexLi.firstChild) {
+                NumIndexLi.removeChild(NumIndexLi.firstChild);
+            }
+            let numUrlsIndexed = document.createElement('span');
+            numUrlsIndexed.innerHTML = "Number of URLs indexed: " + json.d[1];
+            NumIndexLi.appendChild(numUrlsIndexed);
+            console.log(json);
         }
     );
 
